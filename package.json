@@ -1,0 +1,40 @@
+{
+  "name": "node-youtube-data-api-helper",
+  "version": "0.0.0",
+  "description": "YouTube Data API facade to add helper functions and extend the youtube data api functionality. ",
+  "main": "./lib/youtube-data-api.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/themidgame/node-youtube-data-api-helper.git"
+  },
+  "keywords": [
+    "youtube",
+    "data",
+    "api",
+    "node"
+  ],
+  "author": "themidgame <apps@themidgame.com>",
+  "contributors": [
+    {
+      "name": "Andres Diaz",
+      "url": "https://github.com/afdiaz"
+    }
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/themidgame/node-youtube-data-api-helper/issues"
+  },
+  "homepage": "https://github.com/themidgame/node-youtube-data-api-helper#readme",
+  "dependencies": {
+    "googleapis": "^2.1.6"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.4.0",
+    "jshint": "^2.8.0",
+    "mocha": "^2.3.4",
+    "nock": "^3.4.0"
+  }
+}
