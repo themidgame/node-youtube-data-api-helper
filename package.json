@@ -29,7 +29,8 @@
   },
   "homepage": "https://github.com/themidgame/node-youtube-data-api-helper#readme",
   "dependencies": {
-    "googleapis": "^2.1.6"
+    "googleapis": "^2.1.6",
+    "merge": "^1.2.0"
   },
   "devDependencies": {
     "chai": "*",
