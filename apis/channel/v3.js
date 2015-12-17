@@ -10,6 +10,7 @@ function getResponseHandler(resolve, reject) {
       resolve(response);
     }
   };
+
 }
 
 
@@ -19,19 +20,17 @@ function getResponseHandler(resolve, reject) {
 function Channel (options) {
   var self = this;
   this._options = options || {};
-
   this.playlists = {
-
-    list: function(params){
-      params.channelId = self.channelId;
+    list: function(opts){
+      var params = opts || {};
+      params.channelId = self.id;
       return new Promise(function(resolve, reject) {
         youtube.playlists.list(params, getResponseHandler(resolve, reject));
       });
     }
-
   };
 
-
+  this.id = this._options.id || null;
 }
 
 
