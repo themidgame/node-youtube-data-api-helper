@@ -21,15 +21,17 @@ function Channel (options) {
   this._options = options || {};
 
   this.playlists = {
+
     list: function(params){
       params.channelId = self.channelId;
       return new Promise(function(resolve, reject) {
         youtube.playlists.list(params, getResponseHandler(resolve, reject));
       });
     }
+
   };
 
-  this.id = this._options.id || null;
+
 }
 
 
