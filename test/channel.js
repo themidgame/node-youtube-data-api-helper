@@ -31,7 +31,7 @@ describe('Channel', function(){
     var playlists = youtube.channel({version:'v3',id:'UCCjyq_K1Xwfg8Lndy7lKMpA'}).playlists,
         params = {
             part: 'snippet,contentDetails,status,player,localizations',
-            key: 'AIzaSyBx2lxBJy57YLO2Iu-ksb0CD5n7nZkS0Fs',
+            key: 'Key',
             maxResults: '50'
         },
         setupNock = function (opts) {
