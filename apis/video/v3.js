@@ -1,6 +1,7 @@
 var google = require('googleapis'),
   youtube = google.youtube('v3'),
-  CommentThreadsHelper = require('../../helpers/commentThreads/commentThreads');
+  CommentThreadsHelper = require('../../helpers/commentThreads/commentThreads'),
+  CommentsHelper = require('../../helpers/comments/comments');
 
 
 function getResponseHandler(resolve, reject) {
@@ -27,12 +28,22 @@ function Video(options) {
   this.commentThreads = {
 
     list: function (params) {
-      var commentThreadsHelper = new CommentThreadsHelper(),
+      var commentThreadsHelper = new CommentThreadsHelper(youtube),
         queryParams = params || {};
 
       queryParams.videoId = self.id;
+      queryParams.maxResults = 100;
 
-      return commentThreadsHelper.listAll(youtube, queryParams, getResponseHandler);
+      return commentThreadsHelper.listAll(queryParams);
+    },
+
+    listAll: function (params) {
+      var commentsHelper = new CommentsHelper(youtube);
+
+      return self.commentThreads.list(params)
+        .then(function (commentThreadsResponse) {
+          return commentsHelper.getAllReplies(commentThreadsResponse, params);
+        });
     }
   };
 }

@@ -28,7 +28,6 @@ describe('Video', function () {
 
       options = {
         key: 'AIzaSyBx2lxBJy57YLO2Iu-ksb0CD5n7nZkS0Fs',
-        maxResults: 100,
         part: 'id,replies,snippet'
       },
 
@@ -54,7 +53,7 @@ describe('Video', function () {
         nock.cleanAll();
       };
 
-    this.timeout(15000);
+    this.timeout(30000);
 
     it('should return a promise', function () {
       setupNock();
@@ -73,8 +72,8 @@ describe('Video', function () {
       });
     });
 
-    it('client test', function () {
-      return video.commentThreads.list(options).then(function (response) {
+    it('client manual test', function () {
+      return video.commentThreads.listAll(options).then(function (response) {
         assert.isTrue(true, 'should be true');
         console.log(response);
       });
