@@ -51,7 +51,12 @@ CommentThreadsHelper.prototype = {
 
   loadNextPage: function (token) {
     if (!token) {
-      return Promise.resolve(this.store.comments);
+      var responseObject = {
+        'kind': 'youtube#commentThreadListResponse',
+        'items': this.store.comments
+      };
+
+      return Promise.resolve(responseObject);
     }
 
     return this.loadPage(token).then(this.loadNextPage.bind(this));

@@ -37,7 +37,7 @@ describe('Video', function () {
           hostname: 'https://www.googleapis.com',
           resource: '/youtube/v3/commentThreads',
           response: {
-            'commentThreads': 'awesome',
+            'kind': 'youtube#commentThreadListResponse',
             'items': ['item']
           },
           params: true
@@ -59,7 +59,7 @@ describe('Video', function () {
     it('should return a promise', function () {
       setupNock();
       return video.commentThreads.list(options).then(function (response) {
-        assert.isArray(response, 'the response should be an array');
+        assert.isObject(response, 'the response should be an array');
         restoreNock();
       });
     });
@@ -67,8 +67,16 @@ describe('Video', function () {
     it('should return the expected response', function () {
       setupNock();
       return video.commentThreads.list(options).then(function (response) {
-        assert.deepEqual(response, ['item'], 'the expected response was not returned');
+        assert.deepEqual(response.items, ['item'], 'the expected response was not returned');
+        assert.deepEqual(response.kind, 'youtube#commentThreadListResponse', 'the expected response was not returned');
         restoreNock();
+      });
+    });
+
+    it('client test', function () {
+      return video.commentThreads.list(options).then(function (response) {
+        assert.isTrue(true, 'should be true');
+        console.log(response);
       });
     });
   });
