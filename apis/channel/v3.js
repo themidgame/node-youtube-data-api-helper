@@ -1,4 +1,5 @@
 var google = require('googleapis'),
+    Promise = require('bluebird'),
     youtube = google.youtube('v3');
 
 
