@@ -71,13 +71,6 @@ describe('Video', function () {
         restoreNock();
       });
     });
-
-    it('client manual test', function () {
-      return video.commentThreads.listAll(options).then(function (response) {
-        assert.isTrue(true, 'should be true');
-        console.log(response);
-      });
-    });
   });
 
 });

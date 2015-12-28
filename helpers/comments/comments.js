@@ -28,7 +28,6 @@ CommentsHelper.prototype = {
         return Promise.resolve(commentThread);
       }
     }, this);
-
   },
 
   getAllRepliesForCommentThread: function (commentThread) {
@@ -46,10 +45,7 @@ CommentsHelper.prototype = {
         }
       });
     });
-
   }
-
-
 
 };
 
