@@ -1,7 +1,6 @@
 
-function CommentThreadsHelper() {
-  this.client = null;
-  this.responseHandler = null;
+function CommentThreadsHelper(apiClient) {
+  this.client = apiClient;
   this.store = {
     comments: [],
     params: null
@@ -11,9 +10,7 @@ function CommentThreadsHelper() {
 CommentThreadsHelper.prototype = {
   constructor: CommentThreadsHelper,
 
-  listAll: function (apiClient, params, responseHandler) {
-    this.client = apiClient;
-    this.responseHandler = responseHandler;
+  listAll: function (params) {
     this.store.params = params;
 
     return this.loadPage().then(this.loadNextPage.bind(this));
@@ -35,8 +32,14 @@ CommentThreadsHelper.prototype = {
       delete params.pageToken;
     }
 
-    return new Promise(function(resolve, reject) {
-      component.client.commentThreads.list(params, component.responseHandler(resolve, reject));
+    return new Promise(function (resolve, reject) {
+      component.client.commentThreads.list(params, function (err, response) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(response);
+        }
+      });
     });
   },
 
@@ -51,7 +54,12 @@ CommentThreadsHelper.prototype = {
 
   loadNextPage: function (token) {
     if (!token) {
-      return Promise.resolve(this.store.comments);
+      var responseObject = {
+        'kind': 'youtube#commentThreadListResponse',
+        'items': this.store.comments
+      };
+
+      return Promise.resolve(responseObject);
     }
 
     return this.loadPage(token).then(this.loadNextPage.bind(this));
