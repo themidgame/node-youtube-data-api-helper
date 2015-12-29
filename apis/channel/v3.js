@@ -2,7 +2,7 @@ var google = require('googleapis'),
     Promise = require('bluebird'),
     paginator = require('../../lib/paginator'),
     youtube = google.youtube('v3');
-    
+
 /**
  * Channel extension to the YouTube data api channel resource.
  */
@@ -15,10 +15,14 @@ function Channel (options) {
       params.channelId = self.id;
       if(params.allPages){
         delete params.allPages;
+        var mergePages = params.mergePages;
+        delete params.mergePages;
         paginator.options({
           'endpoint': 'playlists.list',
-          'params': params
+          'params': params,
+          'mergePages': mergePages,
         });
+
         return paginator.getAllPages();
       }
       else{

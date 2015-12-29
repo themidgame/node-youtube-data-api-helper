@@ -1,6 +1,6 @@
 {
   "name": "node-youtube-data-api-helper",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "YouTube Data API facade to add helper functions and extend the youtube data api functionality. ",
   "main": "./lib/youtube.js",
   "scripts": {
@@ -35,7 +35,8 @@
   "dependencies": {
     "bluebird": "^3.1.1",
     "googleapis": "^2.1.6",
-    "merge": "^1.2.0"
+    "merge": "^1.2.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "chai": "*",

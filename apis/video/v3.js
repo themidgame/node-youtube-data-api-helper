@@ -1,7 +1,7 @@
 var google = require('googleapis'),
   youtube = google.youtube('v3'),
-  CommentThreadsHelper = require('../../helpers/commentThreads/commentThreads'),
-  CommentsHelper = require('../../helpers/comments/comments');
+  merge = require('merge'),
+  paginator = require('../../lib/paginator');
 
 
 function getResponseHandler(resolve, reject) {
@@ -20,31 +20,91 @@ function getResponseHandler(resolve, reject) {
  */
 
 function Video(options) {
-  var self = this;
+  var video = this;
 
-  this._options = options || {};
-  this.id = options.id || null;
+  video.options = options || {};
+  video.id = options.id || null;
 
-  this.commentThreads = {
+  this.comments = {
 
-    list: function (params) {
-      var commentThreadsHelper = new CommentThreadsHelper(youtube),
-        queryParams = params || {};
+    listThreads: function (params) {
+      params.videoId = video.id;
 
-      queryParams.videoId = self.id;
-      queryParams.maxResults = 100;
+      if (params.all) {
+        delete params.all;
 
-      return commentThreadsHelper.listAll(queryParams);
+        var paginatorOptions = {
+          endpoint: 'commentThreads.list',
+          params: params
+        };
+
+        paginator.options(paginatorOptions);
+        return paginator.getAllPages();
+      } else {
+
+        return new Promise(function (resolve, reject) {
+          youtube.commentThreads.list(params, getResponseHandler(resolve, reject));
+        });
+      }
     },
 
-    listAll: function (params) {
-      var commentsHelper = new CommentsHelper(youtube);
+    getCommentThreadWithAllReplies: function (commentThread, commentOptions) {
+      if (!commentOptions.id && !commentOptions.parentId) {
+        commentOptions.parentId = commentThread.snippet.topLevelComment.id;
+      }
 
-      return self.commentThreads.list(params)
-        .then(function (commentThreadsResponse) {
-          return commentsHelper.getAllReplies(commentThreadsResponse, params);
-        });
+      var paginatorOptions = {
+        endpoint: 'comments.list',
+        params: commentOptions
+      };
+
+      paginator.options(paginatorOptions);
+
+      return paginator.getAllPages().then(function (commentPages) {
+        var comments = [];
+
+        commentPages.forEach(function (page) {
+          comments.push.apply(comments, page.items);
+        }, this);
+
+        commentThread.replies = {
+          comments: comments
+        };
+
+        return commentThread;
+      });
+    },
+
+    getCommentThreadListWithAllReplies: function (commentThreads, commentOptions) {
+      var promises = commentThreads.map(function (commentThread) {
+        return video.comments.getCommentThreadWithAllReplies(commentThread, commentOptions);
+      });
+
+      return Promise.all(promises);
+    },
+
+    getCommentThreadsResponseWithAllReplies: function (commentThreadResponse, commentOptions) {
+      return video.comments.getCommentThreadListWithAllReplies(commentThreadResponse.items, commentOptions).then(function (threadList) {
+        commentThreadResponse.items = threadList;
+        return commentThreadResponse;
+      });
+    },
+
+    listThreadsWithAllReplies: function (commentThreadOptions, commentOptions) {
+      return video.comments.listThreads(commentThreadOptions).then(function (response) {
+
+        if (response instanceof Array) {
+          var promises = response.map(function (responseItem) {
+            return video.comments.getCommentThreadsResponseWithAllReplies(responseItem, commentOptions);
+          });
+
+          return Promise.all(promises);
+        } else {
+          return video.comments.getCommentThreadsResponseWithAllReplies(response, commentOptions);
+        }
+      });
     }
+
   };
 }
 
