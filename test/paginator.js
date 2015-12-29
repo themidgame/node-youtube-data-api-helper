@@ -36,11 +36,11 @@ describe('Paginator', function(){
             'key':'AIzaSyBx2lxBJy57YLO2Iu-ksb0CD5n7nZkS0Fs'
           },
       };
-      /*var playlistsApi = nock('https://www.googleapis.com')
-          .get('/youtube/v3/playlists')
-          .query(true)
-          .reply(200,{
-          });*/
+      var playlistsApi = nock('https://www.googleapis.com')
+            .get('/youtube/v3/playlists')
+            .query(true)
+            .reply(200,{
+          });
       paginator.options(params);
       return paginator.getAllPages().then(function(responses){
         console.log('should retrieve ',responses[0].pageInfo.totalResults,' playlists');
