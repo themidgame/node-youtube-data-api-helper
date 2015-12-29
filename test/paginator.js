@@ -25,33 +25,58 @@ describe('Paginator', function(){
       paginator.options(wrongParams);
       assert.throws(paginator.getAllPages,Error,'missing required params');
     });
-    it('should return all the pages for a channel', function(){
-      this.timeout(15000);
+    it('should return all the pages for an endpoint', function(){
       var params = {
         'endpoint': 'playlists.list',
         'params': {
             'part':'snippet',
             'channelId':'UCCjyq_K1Xwfg8Lndy7lKMpA',
             'maxResults':'50',
-            'key':'AIzaSyBx2lxBJy57YLO2Iu-ksb0CD5n7nZkS0Fs'
+            'key':'YourKey'
           },
       };
-      /*var playlistsApi = nock('https://www.googleapis.com')
+      //Setup 3 mock calls to the api
+      nock('https://www.googleapis.com')
             .get('/youtube/v3/playlists')
             .query(true)
             .reply(200,{
-          });*/
+               "kind": "youtube#playlistListResponse",
+               "nextPageToken": "CDIQAA",
+               "pageInfo": {
+                  "totalResults": 125,
+                  "resultsPerPage": 50
+               },
+               "items": new Array(50)
+             }
+            );
+      nock('https://www.googleapis.com')
+            .get('/youtube/v3/playlists')
+            .query(true)
+            .reply(200,{
+               "kind": "youtube#playlistListResponse",
+               "nextPageToken": "CDIQBB",
+               "pageInfo": {
+                  "totalResults": 125,
+                  "resultsPerPage": 50
+               },
+               "items": new Array(50)
+             }
+            );
+      nock('https://www.googleapis.com')
+            .get('/youtube/v3/playlists')
+            .query(true)
+            .reply(200,{
+               "kind": "youtube#playlistListResponse",
+               "pageInfo": {
+                  "totalResults": 125,
+                  "resultsPerPage": 50
+               },
+               "items": new Array(25)
+             }
+            );
       paginator.options(params);
       return paginator.getAllPages().then(function(responses){
-        console.log('should retrieve ',responses[0].pageInfo.totalResults,' playlists');
-        var counter = 0;
-        responses.forEach(function(response){
-          console.log('getting ', response.items.length, ' playlists');
-          counter+= response.items.length;
-        });
-        console.log('got a total of ', counter, 'playlists');
-        console.log('expected ',responses[0].pageInfo.totalResults,' got ',counter);
-        assert.isTrue(false,'it was totally false');
+        assert.equal(responses.length, 3, 'should contain 3 responses');
       });
     });
   });
