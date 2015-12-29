@@ -40,7 +40,8 @@ function requireAPI(filename) {
  * @private
  */
 var APIs = {
-  'channel': requireAPI('channel')
+  'channel': requireAPI('channel'),
+  'video': requireAPI('video')
 };
 
 /**
