@@ -1,20 +1,8 @@
 var google = require('googleapis'),
     Promise = require('bluebird'),
+    paginator = require('../../lib/paginator'),
     youtube = google.youtube('v3');
-
-
-function getResponseHandler(resolve, reject) {
-  return function (err, response) {
-    if (err) {
-      reject(err);
-    } else {
-      resolve(response);
-    }
-  };
-
-}
-
-
+    
 /**
  * Channel extension to the YouTube data api channel resource.
  */
@@ -25,9 +13,18 @@ function Channel (options) {
     list: function(opts){
       var params = opts || {};
       params.channelId = self.id;
-      return new Promise(function(resolve, reject) {
-        youtube.playlists.list(params, getResponseHandler(resolve, reject));
-      });
+      if(params.allPages){
+        delete params.allPages;
+        paginator.options({
+          'endpoint': 'playlists.list',
+          'params': params
+        });
+        return paginator.getAllPages();
+      }
+      else{
+        promisified = Promise.promisify(youtube.playlists.list);
+        return promisified(params);
+      }
     }
   };
 

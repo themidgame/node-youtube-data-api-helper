@@ -74,4 +74,58 @@ describe('Channel', function () {
 
 
   });
+
+  describe('playlists get all pages', function(){
+    it('should return all the pages', function(){
+      nock('https://www.googleapis.com')
+            .get('/youtube/v3/playlists')
+            .query(true)
+            .reply(200,{
+               "kind": "youtube#playlistListResponse",
+               "nextPageToken": "CDIQAA",
+               "pageInfo": {
+                  "totalResults": 125,
+                  "resultsPerPage": 50
+               },
+               "items": new Array(50)
+             }
+            );
+      nock('https://www.googleapis.com')
+            .get('/youtube/v3/playlists')
+            .query(true)
+            .reply(200,{
+               "kind": "youtube#playlistListResponse",
+               "nextPageToken": "CDIQBB",
+               "pageInfo": {
+                  "totalResults": 125,
+                  "resultsPerPage": 50
+               },
+               "items": new Array(50)
+             }
+            );
+      nock('https://www.googleapis.com')
+            .get('/youtube/v3/playlists')
+            .query(true)
+            .reply(200,{
+               "kind": "youtube#playlistListResponse",
+               "pageInfo": {
+                  "totalResults": 125,
+                  "resultsPerPage": 50
+               },
+               "items": new Array(25)
+             }
+            );
+      var playlists = youtube.channel({ version: 'v3', id: 'UCCjyq_K1Xwfg8Lndy7lKMpA' }).playlists,
+          params = {
+            part: 'snippet,contentDetails,status,player,localizations',
+            key: 'Key',
+            maxResults: '50',
+            allPages: true
+          };
+      return playlists.list(params).then(function (responses) {
+        assert.equal(responses.length, 3, 'should contain 3 responses');
+      });
+
+    });
+  });
 });
