@@ -120,7 +120,8 @@ describe('Channel', function () {
             part: 'snippet,contentDetails,status,player,localizations',
             key: 'Key',
             maxResults: '50',
-            allPages: true
+            allPages: true,
+            mergePages: false,
           };
       return playlists.list(params).then(function (responses) {
         assert.equal(responses.length, 3, 'should contain 3 responses');

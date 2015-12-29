@@ -18,23 +18,7 @@ describe('Paginator', function(){
   });
 
   describe('get all pages', function(){
-    it('should validate the required parameters', function(){
-      var wrongParams = {
-        'whatever': true,
-      };
-      paginator.options(wrongParams);
-      assert.throws(paginator.getAllPages,Error,'missing required params');
-    });
-    it('should return all the pages for an endpoint', function(){
-      var params = {
-        'endpoint': 'playlists.list',
-        'params': {
-            'part':'snippet',
-            'channelId':'UCCjyq_K1Xwfg8Lndy7lKMpA',
-            'maxResults':'50',
-            'key':'YourKey'
-          },
-      };
+    var setupNocks = function(){
       //Setup 3 mock calls to the api
       nock('https://www.googleapis.com')
             .get('/youtube/v3/playlists')
@@ -74,10 +58,82 @@ describe('Paginator', function(){
                "items": new Array(25)
              }
             );
+    };
+    it('should validate the required parameters', function(){
+      var wrongParams = {
+        'whatever': true,
+      };
+      paginator.options(wrongParams);
+      assert.throws(paginator.getAllPages,Error,'missing required params');
+    });
+    it('should return all the pages for an endpoint', function(){
+      var params = {
+        'endpoint': 'playlists.list',
+        'params': {
+            'part':'snippet',
+            'channelId':'UCCjyq_K1Xwfg8Lndy7lKMpA',
+            'maxResults':'50',
+            'key':'YourKey'
+          },
+      };
+      setupNocks();
       paginator.options(params);
       return paginator.getAllPages().then(function(responses){
         assert.equal(responses.length, 3, 'should contain 3 responses');
       });
+    });
+    it('should merge all the pages', function(){
+      var params = {
+        'endpoint': 'playlists.list',
+        'params': {
+            'part':'snippet',
+            'channelId':'UCCjyq_K1Xwfg8Lndy7lKMpA',
+            'maxResults':'50',
+            'key':'YourKey'
+          },
+        'mergePages':true,
+      };
+      setupNocks();
+      paginator.options(params);
+      return paginator.getAllPages().then(function(response){
+        assert.equal(response.items.length, 125, 'all the items should be merged into one');
+        assert.isDefined(response.pageInfo, 'page info should be defined');
+        assert.isDefined(response.pageInfo.totalResults, 'total results should be defined in page info');
+        assert.equal(response.pageInfo.totalResults, 125, 'total results should be computed');
+      });
+    });
+  });
+
+  describe('merge pages', function(){
+    it('should validate the pages passed to it', function(){
+      assert.throws(function(){paginator.mergePages(null);}, Error, 'must provide an array containing pages');
+      assert.throws(function(){paginator.mergePages({});}, Error, 'must provide an array containing pages');
+      assert.throws(function(){paginator.mergePages(new Array(0));}, Error, 'must provide an array containing pages');
+    });
+    it('should merge the items within multiple pages', function(){
+      var pages = [
+        {
+          pageInfo: {
+            totalResults: 67,
+            resultsPerPage: 50
+          },
+          items: new Array(50)
+        },
+        {
+          pageInfo: {
+            totalResults: 67,
+            resultsPerPage: 50
+          },
+          items: new Array(17)
+        }
+      ];
+
+      var mergedPages = paginator.mergePages(pages);
+      assert.isObject(mergedPages, 'the result should be an object');
+      assert.equal(mergedPages.pageInfo.totalResults, 67, 'the totalResults should be updated');
+      assert.equal(mergedPages.items.length, 67, 'items should contain the items of all pages');
+
+
     });
   });
 
