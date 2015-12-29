@@ -67,7 +67,10 @@ function Video(options) {
           comments.push.apply(comments, page.items);
         }, this);
 
-        commentThread.replies.comments = comments;
+        commentThread.replies = {
+          comments: comments
+        };
+
         return commentThread;
       });
     },
