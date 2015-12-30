@@ -48,14 +48,14 @@ function Video(options) {
       }
     },
 
-    getCommentThreadWithAllReplies: function (commentThread, commentOptions) {
-      if (!commentOptions.id && !commentOptions.parentId) {
-        commentOptions.parentId = commentThread.snippet.topLevelComment.id;
+    getCommentThreadWithAllReplies: function (commentThread, commentsOptions) {
+      if (!commentsOptions.id && !commentsOptions.parentId) {
+        commentsOptions.parentId = commentThread.snippet.topLevelComment.id;
       }
 
       var paginatorOptions = {
         endpoint: 'comments.list',
-        params: commentOptions
+        params: commentsOptions
       };
 
       paginator.options(paginatorOptions);
@@ -75,36 +75,56 @@ function Video(options) {
       });
     },
 
-    getCommentThreadListWithAllReplies: function (commentThreads, commentOptions) {
+    getCommentThreadListWithAllReplies: function (commentThreads, commentsOptions) {
       var promises = commentThreads.map(function (commentThread) {
-        return video.comments.getCommentThreadWithAllReplies(commentThread, commentOptions);
+        return video.comments.getCommentThreadWithAllReplies(commentThread, commentsOptions);
       });
 
       return Promise.all(promises);
     },
 
-    getCommentThreadsResponseWithAllReplies: function (commentThreadResponse, commentOptions) {
-      return video.comments.getCommentThreadListWithAllReplies(commentThreadResponse.items, commentOptions).then(function (threadList) {
+    getCommentThreadsResponseWithAllReplies: function (commentThreadResponse, commentsOptions) {
+      return video.comments.getCommentThreadListWithAllReplies(commentThreadResponse.items, commentsOptions).then(function (threadList) {
         commentThreadResponse.items = threadList;
         return commentThreadResponse;
       });
     },
 
-    listThreadsWithAllReplies: function (commentThreadOptions, commentOptions) {
-      return video.comments.listThreads(commentThreadOptions).then(function (response) {
+    listThreadsWithAllReplies: function (commentThreadsOptions, commentsOptions) {
+      return video.comments.listThreads(commentThreadsOptions).then(function (response) {
 
         if (response instanceof Array) {
           var promises = response.map(function (responseItem) {
-            return video.comments.getCommentThreadsResponseWithAllReplies(responseItem, commentOptions);
+            return video.comments.getCommentThreadsResponseWithAllReplies(responseItem, commentsOptions);
           });
 
           return Promise.all(promises);
         } else {
-          return video.comments.getCommentThreadsResponseWithAllReplies(response, commentOptions);
+          return video.comments.getCommentThreadsResponseWithAllReplies(response, commentsOptions);
         }
       });
-    }
+    },
 
+    listAll: function (commentThreadsOptions, commentsOptions) {
+      return video.comments.listThreadsWithAllReplies(commentThreadsOptions, commentsOptions).then(function (commentThreadsPages) {
+        if (!(commentThreadsPages instanceof Array)) {
+          commentThreadsPages = [commentThreadsPages];
+        }
+
+        var commentThreads = paginator.mergePages(commentThreadsPages),
+          comments = [];
+
+        commentThreads.items.forEach(function(commentThread) {
+          var topLevelComment = commentThread.snippet.topLevelComment,
+            commentReplies = commentThread.replies.comments;
+
+          comments.push(topLevelComment);
+          comments.push.apply(comments, commentReplies);
+        }, this);
+
+        return comments;
+      });
+    }
   };
 }
 
