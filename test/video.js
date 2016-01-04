@@ -35,12 +35,15 @@ describe('Video', function () {
       "id": "TopCommentId"
     },
       replies = [
-        [
           {
             "kind": "youtube#comment",
-            "id": "ReplyId"
+            "id": "ReplyId1"
+          },
+
+          {
+            "kind": "youtube#comment",
+            "id": "ReplyId2"
           }
-        ]
       ];
 
     nock('https://www.googleapis.com')
@@ -88,9 +91,10 @@ describe('Video', function () {
 
       return video.comments.listAll(queryParams, queryParams).then(function (response) {
         assert.isArray(response, 'response should be an array');
-        assert.equal(2, response.length, 'response length should be 3');
+        assert.equal(3, response.length, 'response length should be 3');
         assert.deepEqual(response[0], topComment, 'top comment should be in array');
         assert.deepEqual(response[1], replies[0], 'replies should be in array');
+        assert.deepEqual(response[2], replies[1], 'replies should be in array');
       });
     });
   });
