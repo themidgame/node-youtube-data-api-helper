@@ -30,20 +30,33 @@ describe('Video', function () {
   });
 
   describe('comments.listAll', function () {
-    var topComment = {
+    var topComment1 = {
       "kind": "youtube#comment",
-      "id": "TopCommentId"
+      "id": "TopCommentId1"
     },
-      replies = [
-          {
-            "kind": "youtube#comment",
-            "id": "ReplyId1"
-          },
-
-          {
-            "kind": "youtube#comment",
-            "id": "ReplyId2"
-          }
+      topComment2 = {
+        "kind": "youtube#comment",
+        "id": "TopCommentId2"
+      },
+      replies1 = [
+        {
+          "kind": "youtube#comment",
+          "id": "ReplyId1"
+        },
+        {
+          "kind": "youtube#comment",
+          "id": "ReplyId2"
+        }
+      ],
+      replies2 = [
+        {
+          "kind": "youtube#comment",
+          "id": "ReplyId3"
+        },
+        {
+          "kind": "youtube#comment",
+          "id": "ReplyId4"
+        }
       ];
 
     nock('https://www.googleapis.com')
@@ -58,12 +71,22 @@ describe('Video', function () {
         "items": [
           {
             "kind": "youtube#commentThread",
-            "id": "ThreadId",
+            "id": "ThreadId1",
             "snippet": {
               "channelId": "ChannelId",
               "videoId": "VideoId",
-              "topLevelComment": topComment,
-              "totalReplyCount": 1,
+              "topLevelComment": topComment1,
+              "totalReplyCount": 2,
+            }
+          },
+          {
+            "kind": "youtube#commentThread",
+            "id": "ThreadId2",
+            "snippet": {
+              "channelId": "ChannelId",
+              "videoId": "VideoId",
+              "topLevelComment": topComment2,
+              "totalReplyCount": 2,
             }
           }
         ]
@@ -75,10 +98,22 @@ describe('Video', function () {
       .reply(200, {
         "kind": "youtube#commentListResponse",
         "pageInfo": {
-          "totalResults": 1,
-          "resultsPerPage": 1
+          "totalResults": 2,
+          "resultsPerPage": 2
         },
-        "items": replies
+        "items": replies1
+      });
+
+    nock('https://www.googleapis.com')
+      .get('/youtube/v3/comments')
+      .query(true)
+      .reply(200, {
+        "kind": "youtube#commentListResponse",
+        "pageInfo": {
+          "totalResults": 2,
+          "resultsPerPage": 2
+        },
+        "items": replies2
       });
 
     it('should return an array of comments', function () {
@@ -91,10 +126,13 @@ describe('Video', function () {
 
       return video.comments.listAll(queryParams, queryParams).then(function (response) {
         assert.isArray(response, 'response should be an array');
-        assert.equal(3, response.length, 'response length should be 3');
-        assert.deepEqual(response[0], topComment, 'top comment should be in array');
-        assert.deepEqual(response[1], replies[0], 'replies should be in array');
-        assert.deepEqual(response[2], replies[1], 'replies should be in array');
+        assert.equal(6, response.length, 'response length should be 3');
+        assert.deepEqual(response[0], topComment1, 'top comment 1 should be in array');
+        assert.deepEqual(response[1], replies1[0], 'replies should be in array');
+        assert.deepEqual(response[2], replies1[1], 'replies should be in array');
+        assert.deepEqual(response[3], topComment2, 'top comment 2 should be in array');
+        assert.deepEqual(response[4], replies2[0], 'replies should be in array');
+        assert.deepEqual(response[5], replies2[1], 'replies should be in array');
       });
     });
   });
