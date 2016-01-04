@@ -64,6 +64,7 @@ describe('Video', function () {
       .query(true)
       .reply(200, {
         "kind": "youtube#commentThreadListResponse",
+        "nextPageToken": "token",
         "pageInfo": {
           "totalResults": 1,
           "resultsPerPage": 1
@@ -78,7 +79,20 @@ describe('Video', function () {
               "topLevelComment": topComment1,
               "totalReplyCount": 2,
             }
-          },
+          }
+        ]
+      });
+
+    nock('https://www.googleapis.com')
+      .get('/youtube/v3/commentThreads')
+      .query(true)
+      .reply(200, {
+        "kind": "youtube#commentThreadListResponse",
+        "pageInfo": {
+          "totalResults": 1,
+          "resultsPerPage": 1
+        },
+        "items": [
           {
             "kind": "youtube#commentThread",
             "id": "ThreadId2",
@@ -121,7 +135,8 @@ describe('Video', function () {
         video = youtube.video(parameters),
         queryParams = {
           key: 'key',
-          part: 'part'
+          part: 'part',
+          all: true
         };
 
       return video.comments.listAll(queryParams, queryParams).then(function (response) {
