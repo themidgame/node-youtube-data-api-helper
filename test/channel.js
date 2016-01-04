@@ -50,17 +50,12 @@ describe('Channel', function () {
             .get(options.resource)
             .query(options.params)
             .reply(200, options.response);
-      },
-
-      restoreNock = function () {
-        nock.cleanAll();
       };
 
     it('should return a promise', function () {
       setupNock();
       return playlists.list(params).then(function (response) {
         assert.isObject(response, 'the response should be an object');
-        restoreNock();
       });
     });
 
@@ -68,7 +63,6 @@ describe('Channel', function () {
       setupNock();
       return playlists.list(params).then(function (response) {
         assert.deepEqual(response, { 'playlist': 'awesome' }, 'the expected response is not returned');
-        restoreNock();
       });
     });
 
