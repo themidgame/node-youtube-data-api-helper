@@ -49,9 +49,7 @@ function Video(options) {
     },
 
     getCommentThreadWithAllReplies: function (commentThread, commentsOptions) {
-      if (!commentsOptions.id && !commentsOptions.parentId) {
-        commentsOptions.parentId = commentThread.snippet.topLevelComment.id;
-      }
+      commentsOptions.parentId = commentThread.snippet.topLevelComment.id;
 
       var paginatorOptions = {
         endpoint: 'comments.list',
