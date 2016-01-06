@@ -1,6 +1,6 @@
 {
   "name": "node-youtube-data-api-helper",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "YouTube Data API facade to add helper functions and extend the youtube data api functionality. ",
   "main": "./lib/youtube.js",
   "scripts": {
