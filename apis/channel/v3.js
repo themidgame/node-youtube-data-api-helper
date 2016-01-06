@@ -1,6 +1,6 @@
 var google = require('googleapis'),
     Promise = require('bluebird'),
-    paginator = require('../../lib/paginator'),
+    Paginator = require('../../lib/paginator'),
     youtube = google.youtube('v3');
 
 /**
@@ -10,14 +10,14 @@ function Channel (options) {
   var self = this;
   this._options = options || {};
   this.playlists = {
-    list: function(opts){
-      var params = opts || {};
+    list: function (opts) {
+      var params = Object.assign({}, opts);
       params.channelId = self.id;
       if(params.allPages){
         delete params.allPages;
         var mergePages = params.mergePages;
         delete params.mergePages;
-        paginator.options({
+        var paginator = new Paginator({
           'endpoint': 'playlists.list',
           'params': params,
           'mergePages': mergePages,

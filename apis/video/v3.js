@@ -1,7 +1,7 @@
 var google = require('googleapis'),
   youtube = google.youtube('v3'),
   merge = require('merge'),
-  paginator = require('../../lib/paginator');
+  Paginator = require('../../lib/paginator');
 
 
 function getResponseHandler(resolve, reject) {
@@ -28,35 +28,37 @@ function Video(options) {
   this.comments = {
 
     listThreads: function (params) {
-      params.videoId = video.id;
+      var options = Object.assign({}, params);
+      options.videoId = video.id;
 
-      if (params.all) {
-        delete params.all;
+      if (options.all) {
+        delete options.all;
 
         var paginatorOptions = {
           endpoint: 'commentThreads.list',
-          params: params
+          params: options
         };
 
-        paginator.options(paginatorOptions);
+        var paginator = new Paginator(paginatorOptions);
         return paginator.getAllPages();
       } else {
 
         return new Promise(function (resolve, reject) {
-          youtube.commentThreads.list(params, getResponseHandler(resolve, reject));
+          youtube.commentThreads.list(options, getResponseHandler(resolve, reject));
         });
       }
     },
 
     getCommentThreadWithAllReplies: function (commentThread, commentsOptions) {
-      commentsOptions.parentId = commentThread.snippet.topLevelComment.id;
+      var options = Object.assign({}, commentsOptions);
+      options.parentId = commentThread.snippet.topLevelComment.id;
 
       var paginatorOptions = {
         endpoint: 'comments.list',
-        params: commentsOptions
+        params: options
       };
 
-      paginator.options(paginatorOptions);
+      var paginator = new Paginator(paginatorOptions);
 
       return paginator.getAllPages().then(function (commentPages) {
         var comments = [];
@@ -109,10 +111,11 @@ function Video(options) {
           commentThreadsPages = [commentThreadsPages];
         }
 
-        var commentThreads = paginator.mergePages(commentThreadsPages),
+        var paginator = new Paginator(),
+          commentThreads = paginator.mergePages(commentThreadsPages),
           comments = [];
 
-        commentThreads.items.forEach(function(commentThread) {
+        commentThreads.items.forEach(function (commentThread) {
           var topLevelComment = commentThread.snippet.topLevelComment,
             commentReplies = commentThread.replies.comments;
 
