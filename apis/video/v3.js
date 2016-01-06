@@ -1,7 +1,7 @@
 var google = require('googleapis'),
   youtube = google.youtube('v3'),
   merge = require('merge'),
-  paginator = require('../../lib/paginator');
+  Paginator = require('../../lib/paginator');
 
 
 function getResponseHandler(resolve, reject) {
@@ -39,7 +39,7 @@ function Video(options) {
           params: options
         };
 
-        paginator.options(paginatorOptions);
+        var paginator = new Paginator(paginatorOptions);
         return paginator.getAllPages();
       } else {
 
@@ -58,7 +58,7 @@ function Video(options) {
         params: options
       };
 
-      paginator.options(paginatorOptions);
+      var paginator = new Paginator(paginatorOptions);
 
       return paginator.getAllPages().then(function (commentPages) {
         var comments = [];
@@ -111,7 +111,8 @@ function Video(options) {
           commentThreadsPages = [commentThreadsPages];
         }
 
-        var commentThreads = paginator.mergePages(commentThreadsPages),
+        var paginator = new Paginator(),
+          commentThreads = paginator.mergePages(commentThreadsPages),
           comments = [];
 
         commentThreads.items.forEach(function (commentThread) {
