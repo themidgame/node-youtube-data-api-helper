@@ -1,4 +1,4 @@
-var youtube = require('../lib/youtube'),
+var YouTubeDataAPI = require('../lib/youtube'),
   assert = require('chai').assert,
   merge = require('merge'),
   nock = require('nock');
@@ -8,7 +8,8 @@ describe('Video', function () {
   describe('constructor', function () {
 
     it('should set the default parameters to the resulting object', function () {
-      var video = youtube.video('v3');
+      var youtube = new YouTubeDataAPI(),
+        video = youtube.video('v3');
 
       assert.equal(video.id, null, 'Should set the id property to null when no parameters are given');
       assert.deepEqual(video.options, {}, 'Should set the options property to {} when no parameters are given');
@@ -20,7 +21,8 @@ describe('Video', function () {
     });
 
     it('should set the parameters to the resulting object', function () {
-      var parameters = { version: 'v3', id: 'id' },
+      var youtube = new YouTubeDataAPI(),
+        parameters = { version: 'v3', id: 'id' },
         video = youtube.video(parameters);
 
       assert.equal(video.id, parameters.id, 'Should set the id property');
@@ -131,7 +133,8 @@ describe('Video', function () {
       });
 
     it('should return an array of comments', function () {
-      var parameters = { version: 'v3', id: 'videoId' },
+      var youtube = new YouTubeDataAPI(),
+        parameters = { version: 'v3', id: 'videoId' },
         video = youtube.video(parameters),
         queryParams = {
           key: 'key',
