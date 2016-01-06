@@ -10,8 +10,8 @@ function Channel (options) {
   var self = this;
   this._options = options || {};
   this.playlists = {
-    list: function(opts){
-      var params = opts || {};
+    list: function (opts) {
+      var params = Object.assign({}, opts);
       params.channelId = self.id;
       if(params.allPages){
         delete params.allPages;
