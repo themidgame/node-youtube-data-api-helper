@@ -1,7 +1,7 @@
 var google = require('googleapis'),
   youtube = google.youtube('v3'),
   merge = require('merge'),
-  paginator = require('../../lib/paginator');
+  Paginator = require('../../lib/paginator');
 
 
 function getResponseHandler(resolve, reject) {
@@ -28,37 +28,37 @@ function Video(options) {
   this.comments = {
 
     listThreads: function (params) {
-      params.videoId = video.id;
+      var options = Object.assign({}, params);
+      options.videoId = video.id;
 
-      if (params.all) {
-        delete params.all;
+      if (options.all) {
+        delete options.all;
 
         var paginatorOptions = {
           endpoint: 'commentThreads.list',
-          params: params
+          params: options
         };
 
-        paginator.options(paginatorOptions);
+        var paginator = new Paginator(paginatorOptions);
         return paginator.getAllPages();
       } else {
 
         return new Promise(function (resolve, reject) {
-          youtube.commentThreads.list(params, getResponseHandler(resolve, reject));
+          youtube.commentThreads.list(options, getResponseHandler(resolve, reject));
         });
       }
     },
 
-    getCommentThreadWithAllReplies: function (commentThread, commentOptions) {
-      if (!commentOptions.id && !commentOptions.parentId) {
-        commentOptions.parentId = commentThread.snippet.topLevelComment.id;
-      }
+    getCommentThreadWithAllReplies: function (commentThread, commentsOptions) {
+      var options = Object.assign({}, commentsOptions);
+      options.parentId = commentThread.snippet.topLevelComment.id;
 
       var paginatorOptions = {
         endpoint: 'comments.list',
-        params: commentOptions
+        params: options
       };
 
-      paginator.options(paginatorOptions);
+      var paginator = new Paginator(paginatorOptions);
 
       return paginator.getAllPages().then(function (commentPages) {
         var comments = [];
@@ -75,36 +75,57 @@ function Video(options) {
       });
     },
 
-    getCommentThreadListWithAllReplies: function (commentThreads, commentOptions) {
+    getCommentThreadListWithAllReplies: function (commentThreads, commentsOptions) {
       var promises = commentThreads.map(function (commentThread) {
-        return video.comments.getCommentThreadWithAllReplies(commentThread, commentOptions);
+        return video.comments.getCommentThreadWithAllReplies(commentThread, commentsOptions);
       });
 
       return Promise.all(promises);
     },
 
-    getCommentThreadsResponseWithAllReplies: function (commentThreadResponse, commentOptions) {
-      return video.comments.getCommentThreadListWithAllReplies(commentThreadResponse.items, commentOptions).then(function (threadList) {
+    getCommentThreadsResponseWithAllReplies: function (commentThreadResponse, commentsOptions) {
+      return video.comments.getCommentThreadListWithAllReplies(commentThreadResponse.items, commentsOptions).then(function (threadList) {
         commentThreadResponse.items = threadList;
         return commentThreadResponse;
       });
     },
 
-    listThreadsWithAllReplies: function (commentThreadOptions, commentOptions) {
-      return video.comments.listThreads(commentThreadOptions).then(function (response) {
+    listThreadsWithAllReplies: function (commentThreadsOptions, commentsOptions) {
+      return video.comments.listThreads(commentThreadsOptions).then(function (response) {
 
         if (response instanceof Array) {
           var promises = response.map(function (responseItem) {
-            return video.comments.getCommentThreadsResponseWithAllReplies(responseItem, commentOptions);
+            return video.comments.getCommentThreadsResponseWithAllReplies(responseItem, commentsOptions);
           });
 
           return Promise.all(promises);
         } else {
-          return video.comments.getCommentThreadsResponseWithAllReplies(response, commentOptions);
+          return video.comments.getCommentThreadsResponseWithAllReplies(response, commentsOptions);
         }
       });
-    }
+    },
 
+    listAll: function (commentThreadsOptions, commentsOptions) {
+      return video.comments.listThreadsWithAllReplies(commentThreadsOptions, commentsOptions).then(function (commentThreadsPages) {
+        if (!(commentThreadsPages instanceof Array)) {
+          commentThreadsPages = [commentThreadsPages];
+        }
+
+        var paginator = new Paginator(),
+          commentThreads = paginator.mergePages(commentThreadsPages),
+          comments = [];
+
+        commentThreads.items.forEach(function (commentThread) {
+          var topLevelComment = commentThread.snippet.topLevelComment,
+            commentReplies = commentThread.replies.comments;
+
+          comments.push(topLevelComment);
+          comments.push.apply(comments, commentReplies);
+        }, this);
+
+        return comments;
+      });
+    }
   };
 }
 
