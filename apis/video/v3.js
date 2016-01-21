@@ -50,6 +50,14 @@ function Video(options) {
     },
 
     getCommentThreadWithAllReplies: function (commentThread, commentsOptions) {
+      if (commentThread.snippet.totalReplyCount == 0) {
+        commentThread.replies = {
+          comments: []
+        };
+
+        return Promise.resolve(commentThread);
+      }
+
       var options = Object.assign({}, commentsOptions);
       options.parentId = commentThread.snippet.topLevelComment.id;
 

@@ -41,7 +41,8 @@ function requireAPI(filename) {
  */
 var APIs = {
   'channel': requireAPI('channel'),
-  'video': requireAPI('video')
+  'video': requireAPI('video'),
+  'playlist': requireAPI('playlist')
 };
 
 /**
